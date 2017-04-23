@@ -79,6 +79,7 @@ CREATE TABLE сотрудники
 	фамилия int NOT NULL,
 	отчество int NOT NULL,
 	id_смены int NOT NULL,
+    стаж_в_днях int Not Null,
 	CONSTRAINT PK_id_сотрудника PRIMARY KEY NONCLUSTERED (id),
 	CONSTRAINT FK_id_смены_работы FOREIGN KEY (id_смены) REFERENCES смена (id)
 )
@@ -337,4 +338,25 @@ CREATE TABLE проданные_билеты(
 	CONSTRAINT PK_id_прод_бил PRIMARY KEY NONCLUSTERED (id),
 	CONSTRAINT FK_id_билета FOREIGN KEY (id_билета) REFERENCES билеты (id),
 	CONSTRAINT FK_id_кассы FOREIGN KEY (id_кассы) REFERENCES кассы (id),
+)
+CREATE TABLE увеличение_зарплаты_от_стажа(
+    id int NOT NULL IDENTITY(1,1),
+    id_должности int NOT NULL,
+    стаж_в_днях int Not Null,
+    процент увеличения int NOT NULL,
+    CONSTRAINT PK_id_стаж PRIMARY KEY NONCLUSTERED (id),
+    CONSTRAINT FK_id_должн FOREIGN KEY (id_должности) REFERENCES должность (id),
+)
+CREATE TABLE тип_зарплаты(
+    id int NOT NULL IDENTITY(1,1),
+    тип char(50) NOT NULL,
+    CONSTRAINT PK_id_типа_зп PRIMARY KEY NONCLUSTERED (id),
+)
+CREATE TABLE зарплата(
+    id int NOT NULL IDENTITY(1,1),
+    дата date NOT NULL,
+    id_сотрудника NOT NULL,
+    id_типа_зп int NOT NULL,
+    CONSTRAINT PK_id_зарп PRIMARY KEY NONCLUSTERED (id),
+    CONSTRAINT FK_id_типа_Зп FOREIGN KEY (id_типа_зп) REFERENCES тип_зарплаты (id),
 )
