@@ -1,0 +1,340 @@
+CREATE TABLE станция
+(   id int NOT NULL IDENTITY(1,1),
+	название  char(50) NOT NULL,
+	порядковый_номер_на_ветке int NOT NULL,
+	CONSTRAINT PK_id_станция PRIMARY KEY NONCLUSTERED (id)
+)
+INSERT INTO станция(название) VALUES ('Новоясеневская'); 
+INSERT INTO станция(название) VALUES ('Ленинский проспект'); 
+INSERT INTO станция(название) VALUES ('Октябрьская'); 
+INSERT INTO станция(название) VALUES ('Октябрьская'); 
+
+
+CREATE TABLE ветка
+(   id int NOT NULL IDENTITY(1,1),
+	название  char(50) NOT NULL,
+	цвет char(50) NOT NULL,
+	CONSTRAINT PK_id_вет PRIMARY KEY NONCLUSTERED (id)
+)
+
+CREATE TABLE станция_в_ветке
+(   id int NOT NULL IDENTITY(1,1),
+    id_станции int NOT NULL,
+	id_ветки int NOT NULL,
+	CONSTRAINT PK_id_стан PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станцииFst FOREIGN KEY (id_станции) REFERENCES станция (id),
+	CONSTRAINT FK_id_веткиFst FOREIGN KEY (id_ветки) REFERENCES ветка (id)
+)
+
+CREATE TABLE местоположение_входов
+(   id int NOT NULL IDENTITY(1,1),
+    id_станции_в_ветке int NOT NULL,
+	широта char(50) NOT NULL,
+	долгота char(50) NOT NULL
+	CONSTRAINT PK_id_входа PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станции_в_веткеFst FOREIGN KEY (id_станции_в_ветке) REFERENCES станция_в_ветке (id)
+)
+CREATE TABLE переходы
+(   id int NOT NULL IDENTITY(1,1),
+    id_1станции int NOT NULL,
+	id_2станции int NOT NULL,
+	время_перехода time NOT NULL,
+	CONSTRAINT PK_id_перехода PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_1станции FOREIGN KEY (id_1станции) REFERENCES станция_в_ветке (id),
+)
+CREATE TABLE отделы(
+    id int NOT NULL IDENTITY(1,1),
+	функция char(100) NOT NULL,
+	название char(50) NOT NULL,
+	CONSTRAINT PK_id_отд PRIMARY KEY NONCLUSTERED (id),
+)
+
+CREATE TABLE отдел_на_станции(
+    id int NOT NULL IDENTITY(1,1),
+	id_станции_расположения int NOT NULL,
+	id_отдела int NOT NULL,
+	CONSTRAINT PK_id_от PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станции_расположения FOREIGN KEY (id_станции_расположения) REFERENCES станция_в_ветке (id),
+	CONSTRAINT FK_id_к_отделу FOREIGN KEY (id_отдела) REFERENCES отделы (id)
+)
+CREATE TABLE должность
+(   id int NOT NULL IDENTITY(1,1),
+    название int NOT NULL,
+	CONSTRAINT PK_id_дожности PRIMARY KEY NONCLUSTERED (id),
+
+)
+CREATE TABLE смена
+(   id int NOT NULL IDENTITY(1,1),
+    id_должности int NOT NULL,
+    начало time NOT NULL,
+	конец time NOT NULL,
+	оклад money NOT NULL,
+	CONSTRAINT PK_id_смены PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_должности_смены FOREIGN KEY (id_должности) REFERENCES должность (id)
+)
+
+CREATE TABLE сотрудники
+(   id int NOT NULL IDENTITY(1,1),
+    имя int NOT NULL,
+	фамилия int NOT NULL,
+	отчество int NOT NULL,
+	id_смены int NOT NULL,
+	CONSTRAINT PK_id_сотрудника PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_смены_работы FOREIGN KEY (id_смены) REFERENCES смена (id)
+)
+CREATE TABLE посещаемость_вид(
+    id int NOT NULL IDENTITY(1,1),
+    название char(50) NOT NULL,
+	CONSTRAINT PK_id_вида PRIMARY KEY NONCLUSTERED (id),
+)
+CREATE TABLE посещаемость(
+    id int NOT NULL IDENTITY(1,1),
+    id_сотрудника int NOT NULL,
+	день date NOT NULL,
+	посещенность int not null,
+	CONSTRAINT PK_id_посещения PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_сотру FOREIGN KEY (id_сотрудника) REFERENCES сотрудники (id),
+	CONSTRAINT FK_id_вида_посещ FOREIGN KEY (посещенность) REFERENCES посещаемость_вид (id)
+)
+
+CREATE TABLE депо
+(   id int NOT NULL IDENTITY(1,1),
+    дом int NOT NULL,
+	улица int NOT NULL,
+	id_ветки int NOT NULL,
+	CONSTRAINT PK_id_депо PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_веткиScnd FOREIGN KEY (id_ветки) REFERENCES ветка (id)
+)
+
+CREATE TABLE состав
+(   id int NOT NULL IDENTITY(1,1),
+    id_машиниста int NOT NULL,
+	id_депо int NOT NULL,
+	CONSTRAINT PK_id_состава PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_депо FOREIGN KEY (id_депо) REFERENCES депо (id),
+	CONSTRAINT FK_id_машиниста FOREIGN KEY (id_машиниста) REFERENCES сотрудники (id)
+)
+CREATE TABLE поставщик(
+    id int NOT NULL IDENTITY(1,1),
+	название int NOT NULL,
+	телефон char(50) NOT NULL,
+	CONSTRAINT PK_id_поставщика PRIMARY KEY NONCLUSTERED (id),
+)
+CREATE TABLE тип_вагона(
+    id int NOT NULL IDENTITY(1,1),
+	тип char(50) NOT NULL,
+	CONSTRAINT PK_id_type PRIMARY KEY NONCLUSTERED (id),
+)
+CREATE TABLE доступность_вагона(
+        id int NOT NULL IDENTITY(1,1),
+	доступность char(100) NOT NULL,
+	CONSTRAINT PK_id_доступности PRIMARY KEY NONCLUSTERED (id),
+	
+)
+CREATE TABLE вагоны(
+        id int NOT NULL IDENTITY(1,1),
+	поставщик int NOT NULL,
+	дата_производства date NOT NULL,
+	марка char(100) NOT NULL,
+        доступность int Not null,
+        дней_до_профилактики int Not null,
+	тип int NOT NULL,
+	CONSTRAINT PK_id_вагон PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_поставщика FOREIGN KEY (поставщик) REFERENCES поставщик (id),
+	CONSTRAINT FK_id_типа FOREIGN KEY (тип) REFERENCES тип_вагона (id),
+        CONSTRAINT FK_id_доступности FOREIGN KEY (тип) REFERENCES доступность_вагона (id)
+)
+CREATE TABLE вагон_в_составе(
+    id int NOT NULL IDENTITY(1,1),
+	id_вагона int NOT NULL,
+	id_состава int NOT NULL,
+	CONSTRAINT PK_id_вагона_в_составе PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_вагона FOREIGN KEY (id_вагона) REFERENCES вагоны (id),
+	CONSTRAINT FK_id_состава FOREIGN KEY (id_состава) REFERENCES состав (id)
+)
+CREATE TABLE диспетчерская(
+    id int NOT NULL IDENTITY(1,1),
+	id_станции int NOT NULL,
+	CONSTRAINT PK_id_диспетчерской PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станции_располОжен FOREIGN KEY (id_станции) REFERENCES станция_в_ветке (id)
+)
+
+
+CREATE TABLE норма_прибытия_поезда(
+    id int NOT NULL IDENTITY(1,1),
+	id_состава int NOT NULL,
+	время_прибытия time NOT NULL,
+	id_станции int NOT NULL,
+	CONSTRAINT PK_id_норма PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станции_рсп FOREIGN KEY (id_станции) REFERENCES станция_в_ветке (id),
+	CONSTRAINT FK_состав FOREIGN KEY (id_состава) REFERENCES состав (id)
+)
+CREATE TABLE прибытие_поезда(
+    id int NOT NULL IDENTITY(1,1),
+	id_состава int NOT NULL,
+	время_прибытия time NOT NULL,
+	id_нормы int NOT NULL,
+        дата date NOT NULL
+	CONSTRAINT PK_id_прибытие PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_по_норме FOREIGN KEY (id_нормы) REFERENCES норма_прибытия_поезда (id),
+	CONSTRAINT FK_сост FOREIGN KEY (id_состава) REFERENCES состав (id)
+)
+CREATE TABLE баннеры(
+    id int NOT NULL IDENTITY(1,1),
+	id_станции int NOT NULL,
+	цена money  NOT NULL,
+	CONSTRAINT PK_id_баннер PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станции_располОж FOREIGN KEY (id_станции) REFERENCES станция_в_ветке (id)
+)
+CREATE TABLE проданная_реклама(
+    id int NOT NULL IDENTITY(1,1),
+	id_баннера int NOT NULL,
+	компания_покупатель char(50)  NOT NULL,
+	телефон char(10) NOT NULL,
+	CONSTRAINT PK_id_баннера PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_баннера FOREIGN KEY (id_баннера) REFERENCES баннеры (id)
+)
+CREATE TABLE видеокамеры(
+    id int NOT NULL IDENTITY(1,1),
+	id_станции int NOT NULL,
+	CONSTRAINT PK_id_камеры PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станц_располож FOREIGN KEY (id_станции) REFERENCES станция_в_ветке (id)
+)
+CREATE TABLE сотрудничающие_гос_службы(
+    id int NOT NULL IDENTITY(1,1),
+	id_станции int NOT NULL,
+	название char(50) NOT NULL,
+	телефон char(10) NOT NULL,
+	дом int NOT NULL,
+	улица int NOT NULL,
+	CONSTRAINT PK_id_гос_службы PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_служ_стан FOREIGN KEY (id_станции) REFERENCES станция_в_ветке (id)
+)
+
+CREATE TABLE подъемы_спуски(
+    id int NOT NULL IDENTITY(1,1),
+	id_станции int NOT NULL,
+	назначение char(150) NOT NULL,
+	CONSTRAINT PK_id_подъема PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станц_располож_подъема FOREIGN KEY (id_станции) REFERENCES станция_в_ветке (id)
+)
+CREATE TABLE тип_эскалатора(
+    id int NOT NULL IDENTITY(1,1),
+	название char(50) NOT NULL,
+	CONSTRAINT PK_id_типа_эскалатора PRIMARY KEY NONCLUSTERED (id),
+)
+CREATE TABLE эскалатор(
+    id int NOT NULL IDENTITY(1,1),
+	тип int NOT NULL,
+	id_подьема_спуска int NOT NULL,
+	CONSTRAINT PK_id_эскалаторп PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_типа_эскалатора FOREIGN KEY (тип) REFERENCES тип_эскалатора (id),
+	CONSTRAINT FK_id_подьема_спуска FOREIGN KEY (id_подьема_спуска) REFERENCES подъемы_спуски (id)
+)
+CREATE TABLE тип_штрафа(
+    id int NOT NULL IDENTITY(1,1),
+	должность int NOT NULL,
+	размер_штрафа money NOT NULL,
+	нарушение char(100) NOT NULL,
+	CONSTRAINT PK_id_типа_штрафа PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_должности_к_штрафу FOREIGN KEY (должность) REFERENCES должность (id),
+)
+CREATE TABLE штраф(
+    id int NOT NULL IDENTITY(1,1),
+	дата char(50) NOT NULL,
+	id_сотрудника int NOT NULL,
+	id_типа_штрафа int NOT NULL,
+	CONSTRAINT PK_id_штрафа PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id__тип_штрафа FOREIGN KEY (id_типа_штрафа) REFERENCES тип_штрафа (id),
+	CONSTRAINT FK_i_id_сотрудника FOREIGN KEY (id_сотрудника) REFERENCES сотрудники (id),
+)
+
+/*CREATE TABLE автоматы(
+    id int NOT NULL IDENTITY(1,1),
+	id_билета char(50) NOT NULL,
+	id_станции int NOT NULL,
+	id_типа_штрафа int NOT NULL,
+	CONSTRAINT PK_id_штрафа PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id__типа_штрафа FOREIGN KEY (id_типа_штрафа) REFERENCES тип_штрафа (id),
+	CONSTRAINT FK_i_id_сотрудника FOREIGN KEY (id_сотрудника) REFERENCES сотрудники (id),
+)
+*/
+CREATE TABLE мастерские(
+    id int NOT NULL IDENTITY(1,1),
+	id_депо int NOT NULL,
+	CONSTRAINT PK_id_мастерской PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_депо_id FOREIGN KEY (id_депо) REFERENCES  депо (id),
+)
+CREATE TABLE вагон_в_мастерской(
+        id int NOT NULL IDENTITY(1,1),
+        id_вагона int NOT NULL,
+	id_мастерской int NOT NULL,
+	CONSTRAINT PK_id_вагона_в_мастерской PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_мастерская_id FOREIGN KEY (id_мастерской) REFERENCES  мастерские (id),
+        CONSTRAINT FK_вагонский_id FOREIGN KEY (id_вагона) REFERENCES  вагоны (id),
+)
+
+CREATE TABLE застройщик(
+        id int NOT NULL IDENTITY(1,1),
+	название char(50) NOT NULL,
+	CONSTRAINT PK_id_застройщика PRIMARY KEY NONCLUSTERED (id),
+)
+CREATE TABLE станции_в_разработке(
+        id int NOT NULL IDENTITY(1,1),
+	название char(50) NOT NULL,
+        id_застройщика int NOT NULL,
+	id_ветки int NOT NULL,
+	дата_открытия date NOT NULL,
+	CONSTRAINT PK_id_станции_в_разработке PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_веткиFst2 FOREIGN KEY (id_ветки) REFERENCES ветка (id),
+	CONSTRAINT FK_id_застройщика FOREIGN KEY (id_застройщика) REFERENCES застройщик (id)
+)
+
+CREATE TABLE способы_входа_в_метро(
+        id int NOT NULL IDENTITY(1,1),
+	название char(50) NOT NULL,
+	CONSTRAINT PK_id_способа_входа PRIMARY KEY NONCLUSTERED (id)
+)
+
+CREATE TABLE тарифы(
+        id int NOT NULL IDENTITY(1,1),
+	id_способа_входа int NOT NULL,
+        цена money NOT NULL,
+        описание_тарифа char(500) NOT NULL,
+       	CONSTRAINT PK_id_тарифа PRIMARY KEY NONCLUSTERED (id),
+        CONSTRAINT FK_id_способа_входа FOREIGN KEY (id_ветки) REFERENCES способы_входа_в_метро (id),
+)
+CREATE TABLE кассы(
+    id int NOT NULL IDENTITY(1,1),
+	id_станции int NOT NULL,
+	id_сотрудника int NOT NULL,
+	CONSTRAINT PK_id_кассы PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_станц_распОлОжения FOREIGN KEY (id_станции) REFERENCES станция_в_ветке (id)
+)
+CREATE TABLE билеты(
+        id int NOT NULL IDENTITY(1,1),
+	тип_билета char(50) NOT NULL,
+        id_тарифа int NOT NULL,
+	цена money NOT NULL,
+	CONSTRAINT PK_id_билет PRIMARY KEY NONCLUSTERED (id),
+        CONSTRAINT FK_id_тар FOREIGN KEY (id_тарифа) REFERENCES тарифы (id)
+)
+CREATE TABLE билеты_в_кассе(
+    id int NOT NULL IDENTITY(1,1),
+	id_билета int NOT NULL,
+	id_кассы int NOT NULL,
+	кол_во_билетов int NOT NULL,
+	CONSTRAINT PK_id_бил_кас PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_типа_билета FOREIGN KEY (id_билета) REFERENCES билеты (id),
+	CONSTRAINT FK_id_касс FOREIGN KEY (id_кассы) REFERENCES кассы (id)
+)
+CREATE TABLE проданные_билеты(
+    id int NOT NULL IDENTITY(1,1),
+	id_билета int NOT NULL,
+	id_кассы int NOT NULL,
+	кол_во_проданных_билетов int NOT NULL,
+	дата date NOT NULL,
+	CONSTRAINT PK_id_прод_бил PRIMARY KEY NONCLUSTERED (id),
+	CONSTRAINT FK_id_билета FOREIGN KEY (id_билета) REFERENCES билеты (id),
+	CONSTRAINT FK_id_кассы FOREIGN KEY (id_кассы) REFERENCES кассы (id),
+)
