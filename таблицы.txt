@@ -124,6 +124,7 @@ CREATE TABLE поставщик(
 CREATE TABLE тип_вагона(
     id int NOT NULL IDENTITY(1,1),
 	тип char(50) NOT NULL,
+        дата осмотра date NOT NULL
 	CONSTRAINT PK_id_type PRIMARY KEY NONCLUSTERED (id),
 )
 CREATE TABLE доступность_вагона(
